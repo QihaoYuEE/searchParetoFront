@@ -29,8 +29,7 @@ InitFront = struct();         % This initialize the struct but not preallocation
 for iValue = 1:nValue
     % The selected Value substract the temporary best value.
     % ~GoalsLogic gives
-    if ~isequal( (Fun1D(iValue,:)-Fun1D(iTemp,:)>0), ~GoalsLogic ) ...
-            ||  (isequal(Fun1D(iValue,:),Fun1D(iTemp,:)))
+    if ~isDominated(Fun1D(iTemp,:),Fun1D(iValue,:),GoalsLogic)
         InitFront(iInitFront).Value = Fun1D(iValue,:);
         InitFront(iInitFront).Index = iValue;
         InitFront(iInitFront).Valid = 1;
@@ -45,8 +44,9 @@ end
 for iInitFront = 1:length(InitFront)
     iTemp = iInitFront;
     for jInitFront = 1:length(InitFront)
-        if isequal( (InitFront(jInitFront).Value - InitFront(iTemp).Value > 0), ~GoalsLogic )...
-                && jInitFront ~= iTemp
+        if isDominated(InitFront(iTemp).Value,InitFront(jInitFront).Value,GoalsLogic)
+%         if isequal( (InitFront(jInitFront).Value - InitFront(iTemp).Value > 0), ~GoalsLogic )...
+%                 && jInitFront ~= iTemp
             InitFront(jInitFront).Valid = 0;
         else
         end
@@ -96,3 +96,37 @@ end
 ParetoFront = OutTemp;
 end
 
+
+%% Check the ArrayA is dominated than ArrayB or not
+% A = [100,100];
+% B = cat(1,[90,90],[90,100],[90,110],[100,90],[100,100],[100,110],[110,90],[110,100],[110,110]);
+% Logic = [1,1];
+% 
+% Size = size(B);
+% for Index = 1:Size(1)
+%     Result(Index) = isDominated(A,B(Index,:),Logic);
+% end
+% 
+% Result
+
+function Result = isDominated(ArrayA,ArrayB,Logic)
+% If ArrayA is completely the same with ArrayB, it is not dominated
+if isequal(ArrayA,ArrayB)
+    Result  = 0;
+    return
+end
+
+Diff        = ArrayA - ArrayB;
+for Index   = 1:length(ArrayA)
+    if Diff(Index)>0 && Logic(Index) == 0
+        Result = 0;
+        return
+    elseif Diff(Index)<0 && Logic(Index) == 1
+        Result = 0;
+        return
+    end
+end
+
+Result = 1;
+
+end
