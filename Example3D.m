@@ -28,7 +28,7 @@ Data.Fun(3).Goal = "Min";
 
 %%
 ParetoFront = searchParetoFront(Data);
-
+ParetoFrontIndex    = searchParetoFrontIndex(Data);
 %%
 x1 = Data.Var(1).Value(:);
 x2 = Data.Var(2).Value(:);

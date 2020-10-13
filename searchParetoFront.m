@@ -2,18 +2,15 @@
 %%
 function ParetoFront = searchParetoFront(Data)
 %% Initialize the dataset
-PopSize = zeros(1,length(Data.Var));
-for iVar = 1:length(Data.Var)
-    PopSize(iVar) = length(Data.Var(iVar).Value);
-end
-nFun = length(Data.Fun);
-nValue = prod(PopSize);
-Fun1D = zeros(nValue,nFun);
+nFun        = length(Data.Fun);
+PopSize     = size(Data.Fun(1).Value);
+nValue      = prod(PopSize);
+Fun1D       = zeros(nValue,nFun);
 for iFun = 1:nFun
     Fun1D(:,iFun) = Data.Fun(iFun).Value(:);
 end
 % Find the goal of the optimization, Max=1, Min=0
-GoalsLogic = strcmpi([Data.Fun(:).Goal], "Max");
+GoalsLogic  = strcmpi([Data.Fun(:).Goal], "Max");
 
 %% Select the initial datasets which contains Pareto front
 % Start from the first, helping reduce the size of the initial datasets
@@ -27,8 +24,6 @@ end
 iInitFront = 1;
 InitFront = struct();         % This initialize the struct but not preallocation
 for iValue = 1:nValue
-    % The selected Value substract the temporary best value.
-    % ~GoalsLogic gives
     if ~isDominated(Fun1D(iTemp,:),Fun1D(iValue,:),GoalsLogic)
         InitFront(iInitFront).Value = Fun1D(iValue,:);
         InitFront(iInitFront).Index = iValue;
@@ -45,8 +40,6 @@ for iInitFront = 1:length(InitFront)
     iTemp = iInitFront;
     for jInitFront = 1:length(InitFront)
         if isDominated(InitFront(iTemp).Value,InitFront(jInitFront).Value,GoalsLogic)
-%         if isequal( (InitFront(jInitFront).Value - InitFront(iTemp).Value > 0), ~GoalsLogic )...
-%                 && jInitFront ~= iTemp
             InitFront(jInitFront).Valid = 0;
         else
         end
